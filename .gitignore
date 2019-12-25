@@ -1,7 +1,8 @@
 
 *.DS_store
 *.o
-*.yy.c
+*.c
+*.d
 *.tab.*
 *.output
 gpl
