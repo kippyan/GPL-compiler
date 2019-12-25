@@ -1,4 +1,4 @@
-Terminals unused in grammar
+Terminals which are not used
 
    "error"
 
@@ -167,7 +167,7 @@ Grammar
   124              | "floor"
   125              | "random"
 
-  126 empty: %empty
+  126 empty: /* empty */
 
 
 Terminals, with rules where they appear
@@ -344,12 +344,13 @@ expression (127)
 primary_expression (128)
     on left: 109 110 111 112 113 114 115, on right: 90
 math_operator (129)
-    on left: 116 117 118 119 120 121 122 123 124 125, on right: 106
+    on left: 116 117 118 119 120 121 122 123 124 125,
+    on right: 106
 empty (130)
     on left: 126, on right: 3 13 22 28 80
 
 
-State 0
+state 0
 
     0 $accept: . program $end
 
@@ -360,14 +361,14 @@ State 0
     empty             go to state 3
 
 
-State 1
+state 1
 
     0 $accept: program . $end
 
     $end  shift, and go to state 4
 
 
-State 2
+state 2
 
     1 program: declaration_list . block_list
     2 declaration_list: declaration_list . declaration
@@ -394,98 +395,98 @@ State 2
     empty                 go to state 21
 
 
-State 3
+state 3
 
     3 declaration_list: empty .
 
     $default  reduce using rule 3 (declaration_list)
 
 
-State 4
+state 4
 
     0 $accept: program $end .
 
     $default  accept
 
 
-State 5
+state 5
 
     9 simple_type: "int" .
 
     $default  reduce using rule 9 (simple_type)
 
 
-State 6
+state 6
 
    10 simple_type: "double" .
 
     $default  reduce using rule 10 (simple_type)
 
 
-State 7
+state 7
 
    11 simple_type: "string" .
 
     $default  reduce using rule 11 (simple_type)
 
 
-State 8
+state 8
 
    16 object_type: "triangle" .
 
     $default  reduce using rule 16 (object_type)
 
 
-State 9
+state 9
 
    17 object_type: "pixmap" .
 
     $default  reduce using rule 17 (object_type)
 
 
-State 10
+state 10
 
    18 object_type: "circle" .
 
     $default  reduce using rule 18 (object_type)
 
 
-State 11
+state 11
 
    19 object_type: "rectangle" .
 
     $default  reduce using rule 19 (object_type)
 
 
-State 12
+state 12
 
    20 object_type: "textbox" .
 
     $default  reduce using rule 20 (object_type)
 
 
-State 13
+state 13
 
    26 forward_declaration: "forward" . "animation" "identifier" "(" animation_parameter ")"
 
     "animation"  shift, and go to state 22
 
 
-State 14
+state 14
 
     2 declaration_list: declaration_list declaration .
 
     $default  reduce using rule 2 (declaration_list)
 
 
-State 15
+state 15
 
     4 declaration: variable_declaration . ";"
 
     ";"  shift, and go to state 23
 
 
-State 16
+state 16
 
     7 variable_declaration: simple_type . "identifier" optional_initializer
     8                     | simple_type . "identifier" "[" expression "]"
@@ -493,14 +494,14 @@ State 16
     "identifier"  shift, and go to state 24
 
 
-State 17
+state 17
 
     5 declaration: object_declaration . ";"
 
     ";"  shift, and go to state 25
 
 
-State 18
+state 18
 
    14 object_declaration: object_type . "identifier" "(" parameter_list_or_empty ")"
    15                   | object_type . "identifier" "[" expression "]"
@@ -508,14 +509,14 @@ State 18
     "identifier"  shift, and go to state 26
 
 
-State 19
+state 19
 
     6 declaration: forward_declaration . ";"
 
     ";"  shift, and go to state 27
 
 
-State 20
+state 20
 
     1 program: declaration_list block_list .
    27 block_list: block_list . block
@@ -534,28 +535,28 @@ State 20
     on_block              go to state 36
 
 
-State 21
+state 21
 
    28 block_list: empty .
 
     $default  reduce using rule 28 (block_list)
 
 
-State 22
+state 22
 
    26 forward_declaration: "forward" "animation" . "identifier" "(" animation_parameter ")"
 
     "identifier"  shift, and go to state 37
 
 
-State 23
+state 23
 
     4 declaration: variable_declaration ";" .
 
     $default  reduce using rule 4 (declaration)
 
 
-State 24
+state 24
 
     7 variable_declaration: simple_type "identifier" . optional_initializer
     8                     | simple_type "identifier" . "[" expression "]"
@@ -569,14 +570,14 @@ State 24
     empty                 go to state 41
 
 
-State 25
+state 25
 
     5 declaration: object_declaration ";" .
 
     $default  reduce using rule 5 (declaration)
 
 
-State 26
+state 26
 
    14 object_declaration: object_type "identifier" . "(" parameter_list_or_empty ")"
    15                   | object_type "identifier" . "[" expression "]"
@@ -585,14 +586,14 @@ State 26
     "["  shift, and go to state 43
 
 
-State 27
+state 27
 
     6 declaration: forward_declaration ";" .
 
     $default  reduce using rule 6 (declaration)
 
 
-State 28
+state 28
 
    33 initialization_block: "initialization" . statement_block
 
@@ -601,7 +602,7 @@ State 28
     statement_block  go to state 45
 
 
-State 29
+state 29
 
    34 termination_block: "termination" . statement_block
 
@@ -610,14 +611,14 @@ State 29
     statement_block  go to state 46
 
 
-State 30
+state 30
 
    35 animation_block: "animation" . "identifier" "(" check_animation_parameter ")" "{" statement_list "}"
 
     "identifier"  shift, and go to state 47
 
 
-State 31
+state 31
 
    38 on_block: "on" . keystroke statement_block
 
@@ -649,49 +650,49 @@ State 31
     keystroke  go to state 72
 
 
-State 32
+state 32
 
    27 block_list: block_list block .
 
     $default  reduce using rule 27 (block_list)
 
 
-State 33
+state 33
 
    29 block: initialization_block .
 
     $default  reduce using rule 29 (block)
 
 
-State 34
+state 34
 
    30 block: termination_block .
 
     $default  reduce using rule 30 (block)
 
 
-State 35
+state 35
 
    31 block: animation_block .
 
     $default  reduce using rule 31 (block)
 
 
-State 36
+state 36
 
    32 block: on_block .
 
     $default  reduce using rule 32 (block)
 
 
-State 37
+state 37
 
    26 forward_declaration: "forward" "animation" "identifier" . "(" animation_parameter ")"
 
     "("  shift, and go to state 73
 
 
-State 38
+state 38
 
     8 variable_declaration: simple_type "identifier" "[" . expression "]"
 
@@ -721,7 +722,7 @@ State 38
     math_operator       go to state 96
 
 
-State 39
+state 39
 
    12 optional_initializer: "=" . expression
 
@@ -751,21 +752,21 @@ State 39
     math_operator       go to state 96
 
 
-State 40
+state 40
 
     7 variable_declaration: simple_type "identifier" optional_initializer .
 
     $default  reduce using rule 7 (variable_declaration)
 
 
-State 41
+state 41
 
    13 optional_initializer: empty .
 
     $default  reduce using rule 13 (optional_initializer)
 
 
-State 42
+state 42
 
    14 object_declaration: object_type "identifier" "(" . parameter_list_or_empty ")"
 
@@ -779,7 +780,7 @@ State 42
     empty                    go to state 102
 
 
-State 43
+state 43
 
    15 object_declaration: object_type "identifier" "[" . expression "]"
 
@@ -809,7 +810,7 @@ State 43
     math_operator       go to state 96
 
 
-State 44
+state 44
 
    65 statement_block: "{" . statement_list "}"
    66                | "{" . "}"
@@ -831,196 +832,196 @@ State 44
     variable          go to state 116
 
 
-State 45
+state 45
 
    33 initialization_block: "initialization" statement_block .
 
     $default  reduce using rule 33 (initialization_block)
 
 
-State 46
+state 46
 
    34 termination_block: "termination" statement_block .
 
     $default  reduce using rule 34 (termination_block)
 
 
-State 47
+state 47
 
    35 animation_block: "animation" "identifier" . "(" check_animation_parameter ")" "{" statement_list "}"
 
     "("  shift, and go to state 117
 
 
-State 48
+state 48
 
    39 keystroke: "space" .
 
     $default  reduce using rule 39 (keystroke)
 
 
-State 49
+state 49
 
    42 keystroke: "leftarrow" .
 
     $default  reduce using rule 42 (keystroke)
 
 
-State 50
+state 50
 
    43 keystroke: "rightarrow" .
 
     $default  reduce using rule 43 (keystroke)
 
 
-State 51
+state 51
 
    40 keystroke: "uparrow" .
 
     $default  reduce using rule 40 (keystroke)
 
 
-State 52
+state 52
 
    41 keystroke: "downarrow" .
 
     $default  reduce using rule 41 (keystroke)
 
 
-State 53
+state 53
 
    44 keystroke: "leftmouse_down" .
 
     $default  reduce using rule 44 (keystroke)
 
 
-State 54
+state 54
 
    45 keystroke: "middlemouse_down" .
 
     $default  reduce using rule 45 (keystroke)
 
 
-State 55
+state 55
 
    46 keystroke: "rightmouse_down" .
 
     $default  reduce using rule 46 (keystroke)
 
 
-State 56
+state 56
 
    47 keystroke: "leftmouse_up" .
 
     $default  reduce using rule 47 (keystroke)
 
 
-State 57
+state 57
 
    48 keystroke: "middlemouse_up" .
 
     $default  reduce using rule 48 (keystroke)
 
 
-State 58
+state 58
 
    49 keystroke: "rightmouse_up" .
 
     $default  reduce using rule 49 (keystroke)
 
 
-State 59
+state 59
 
    50 keystroke: "mouse_move" .
 
     $default  reduce using rule 50 (keystroke)
 
 
-State 60
+state 60
 
    51 keystroke: "mouse_drag" .
 
     $default  reduce using rule 51 (keystroke)
 
 
-State 61
+state 61
 
    62 keystroke: "f1" .
 
     $default  reduce using rule 62 (keystroke)
 
 
-State 62
+state 62
 
    52 keystroke: "akey" .
 
     $default  reduce using rule 52 (keystroke)
 
 
-State 63
+state 63
 
    53 keystroke: "skey" .
 
     $default  reduce using rule 53 (keystroke)
 
 
-State 64
+state 64
 
    54 keystroke: "dkey" .
 
     $default  reduce using rule 54 (keystroke)
 
 
-State 65
+state 65
 
    55 keystroke: "fkey" .
 
     $default  reduce using rule 55 (keystroke)
 
 
-State 66
+state 66
 
    56 keystroke: "hkey" .
 
     $default  reduce using rule 56 (keystroke)
 
 
-State 67
+state 67
 
    57 keystroke: "jkey" .
 
     $default  reduce using rule 57 (keystroke)
 
 
-State 68
+state 68
 
    58 keystroke: "kkey" .
 
     $default  reduce using rule 58 (keystroke)
 
 
-State 69
+state 69
 
    59 keystroke: "lkey" .
 
     $default  reduce using rule 59 (keystroke)
 
 
-State 70
+state 70
 
    60 keystroke: "wkey" .
 
     $default  reduce using rule 60 (keystroke)
 
 
-State 71
+state 71
 
    61 keystroke: "zkey" .
 
     $default  reduce using rule 61 (keystroke)
 
 
-State 72
+state 72
 
    38 on_block: "on" keystroke . statement_block
 
@@ -1029,7 +1030,7 @@ State 72
     statement_block  go to state 118
 
 
-State 73
+state 73
 
    26 forward_declaration: "forward" "animation" "identifier" "(" . animation_parameter ")"
 
@@ -1043,21 +1044,21 @@ State 73
     animation_parameter  go to state 120
 
 
-State 74
+state 74
 
   112 primary_expression: "true" .
 
     $default  reduce using rule 112 (primary_expression)
 
 
-State 75
+state 75
 
   113 primary_expression: "false" .
 
     $default  reduce using rule 113 (primary_expression)
 
 
-State 76
+state 76
 
   109 primary_expression: "(" . expression ")"
 
@@ -1087,7 +1088,7 @@ State 76
     math_operator       go to state 96
 
 
-State 77
+state 77
 
   104 expression: "-" . expression
 
@@ -1117,77 +1118,77 @@ State 77
     math_operator       go to state 96
 
 
-State 78
+state 78
 
   116 math_operator: "sin" .
 
     $default  reduce using rule 116 (math_operator)
 
 
-State 79
+state 79
 
   117 math_operator: "cos" .
 
     $default  reduce using rule 117 (math_operator)
 
 
-State 80
+state 80
 
   118 math_operator: "tan" .
 
     $default  reduce using rule 118 (math_operator)
 
 
-State 81
+state 81
 
   119 math_operator: "asin" .
 
     $default  reduce using rule 119 (math_operator)
 
 
-State 82
+state 82
 
   120 math_operator: "acos" .
 
     $default  reduce using rule 120 (math_operator)
 
 
-State 83
+state 83
 
   121 math_operator: "atan" .
 
     $default  reduce using rule 121 (math_operator)
 
 
-State 84
+state 84
 
   122 math_operator: "sqrt" .
 
     $default  reduce using rule 122 (math_operator)
 
 
-State 85
+state 85
 
   124 math_operator: "floor" .
 
     $default  reduce using rule 124 (math_operator)
 
 
-State 86
+state 86
 
   123 math_operator: "abs" .
 
     $default  reduce using rule 123 (math_operator)
 
 
-State 87
+state 87
 
   125 math_operator: "random" .
 
     $default  reduce using rule 125 (math_operator)
 
 
-State 88
+state 88
 
   105 expression: "!" . expression
 
@@ -1217,7 +1218,7 @@ State 88
     math_operator       go to state 96
 
 
-State 89
+state 89
 
    86 variable: "identifier" .
    87         | "identifier" . "[" expression "]"
@@ -1230,35 +1231,35 @@ State 89
     $default  reduce using rule 86 (variable)
 
 
-State 90
+state 90
 
   111 primary_expression: "int constant" .
 
     $default  reduce using rule 111 (primary_expression)
 
 
-State 91
+state 91
 
   114 primary_expression: "double constant" .
 
     $default  reduce using rule 114 (primary_expression)
 
 
-State 92
+state 92
 
   115 primary_expression: "string constant" .
 
     $default  reduce using rule 115 (primary_expression)
 
 
-State 93
+state 93
 
   110 primary_expression: variable .
 
     $default  reduce using rule 110 (primary_expression)
 
 
-State 94
+state 94
 
     8 variable_declaration: simple_type "identifier" "[" expression . "]"
    91 expression: expression . "||" expression
@@ -1295,21 +1296,21 @@ State 94
     "||"       shift, and go to state 141
 
 
-State 95
+state 95
 
    90 expression: primary_expression .
 
     $default  reduce using rule 90 (expression)
 
 
-State 96
+state 96
 
   106 expression: math_operator . "(" expression ")"
 
     "("  shift, and go to state 142
 
 
-State 97
+state 97
 
    12 optional_initializer: "=" expression .
    91 expression: expression . "||" expression
@@ -1347,21 +1348,21 @@ State 97
     $default  reduce using rule 12 (optional_initializer)
 
 
-State 98
+state 98
 
    25 parameter: "identifier" . "=" expression
 
     "="  shift, and go to state 143
 
 
-State 99
+state 99
 
    14 object_declaration: object_type "identifier" "(" parameter_list_or_empty . ")"
 
     ")"  shift, and go to state 144
 
 
-State 100
+state 100
 
    21 parameter_list_or_empty: parameter_list .
    23 parameter_list: parameter_list . "," parameter
@@ -1371,21 +1372,21 @@ State 100
     $default  reduce using rule 21 (parameter_list_or_empty)
 
 
-State 101
+state 101
 
    24 parameter_list: parameter .
 
     $default  reduce using rule 24 (parameter_list)
 
 
-State 102
+state 102
 
    22 parameter_list_or_empty: empty .
 
     $default  reduce using rule 22 (parameter_list_or_empty)
 
 
-State 103
+state 103
 
    15 object_declaration: object_type "identifier" "[" expression . "]"
    91 expression: expression . "||" expression
@@ -1422,7 +1423,7 @@ State 103
     "||"       shift, and go to state 141
 
 
-State 104
+state 104
 
    74 if_statement: "if" . "(" expression ")" statement_or_block_of_statements
    75             | "if" . "(" expression ")" statement_or_block_of_statements "else" statement_or_block_of_statements
@@ -1430,35 +1431,35 @@ State 104
     "("  shift, and go to state 147
 
 
-State 105
+state 105
 
    76 for_statement: "for" . "(" assign_statement_or_empty ";" expression ";" assign_statement_or_empty ")" statement_or_block_of_statements
 
     "("  shift, and go to state 148
 
 
-State 106
+state 106
 
    77 print_statement: "print" . "(" expression ")"
 
     "("  shift, and go to state 149
 
 
-State 107
+state 107
 
    78 exit_statement: "exit" . "(" expression ")"
 
     "("  shift, and go to state 150
 
 
-State 108
+state 108
 
    66 statement_block: "{" "}" .
 
     $default  reduce using rule 66 (statement_block)
 
 
-State 109
+state 109
 
    65 statement_block: "{" statement_list . "}"
    67 statement_list: statement_list . statement
@@ -1479,49 +1480,49 @@ State 109
     variable          go to state 116
 
 
-State 110
+state 110
 
    68 statement_list: statement .
 
     $default  reduce using rule 68 (statement_list)
 
 
-State 111
+state 111
 
    69 statement: if_statement .
 
     $default  reduce using rule 69 (statement)
 
 
-State 112
+state 112
 
    70 statement: for_statement .
 
     $default  reduce using rule 70 (statement)
 
 
-State 113
+state 113
 
    72 statement: print_statement . ";"
 
     ";"  shift, and go to state 153
 
 
-State 114
+state 114
 
    73 statement: exit_statement . ";"
 
     ";"  shift, and go to state 154
 
 
-State 115
+state 115
 
    71 statement: assign_statement . ";"
 
     ";"  shift, and go to state 155
 
 
-State 116
+state 116
 
    81 assign_statement: variable . "=" expression
    82                 | variable . "+=" expression
@@ -1536,7 +1537,7 @@ State 116
     "--"  shift, and go to state 160
 
 
-State 117
+state 117
 
    35 animation_block: "animation" "identifier" "(" . check_animation_parameter ")" "{" statement_list "}"
 
@@ -1550,28 +1551,28 @@ State 117
     check_animation_parameter  go to state 162
 
 
-State 118
+state 118
 
    38 on_block: "on" keystroke statement_block .
 
     $default  reduce using rule 38 (on_block)
 
 
-State 119
+state 119
 
    36 animation_parameter: object_type . "identifier"
 
     "identifier"  shift, and go to state 163
 
 
-State 120
+state 120
 
    26 forward_declaration: "forward" "animation" "identifier" "(" animation_parameter . ")"
 
     ")"  shift, and go to state 164
 
 
-State 121
+state 121
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -1608,7 +1609,7 @@ State 121
     "||"       shift, and go to state 141
 
 
-State 122
+state 122
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -1630,7 +1631,7 @@ State 122
     $default  reduce using rule 104 (expression)
 
 
-State 123
+state 123
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -1652,7 +1653,7 @@ State 123
     $default  reduce using rule 105 (expression)
 
 
-State 124
+state 124
 
    87 variable: "identifier" "[" . expression "]"
    89         | "identifier" "[" . expression "]" "." "identifier"
@@ -1683,14 +1684,14 @@ State 124
     math_operator       go to state 96
 
 
-State 125
+state 125
 
    88 variable: "identifier" "." . "identifier"
 
     "identifier"  shift, and go to state 167
 
 
-State 126
+state 126
 
   108 expression: expression "touches" . expression
 
@@ -1720,7 +1721,7 @@ State 126
     math_operator       go to state 96
 
 
-State 127
+state 127
 
   107 expression: expression "near" . expression
 
@@ -1750,14 +1751,14 @@ State 127
     math_operator       go to state 96
 
 
-State 128
+state 128
 
     8 variable_declaration: simple_type "identifier" "[" expression "]" .
 
     $default  reduce using rule 8 (variable_declaration)
 
 
-State 129
+state 129
 
   101 expression: expression "*" . expression
 
@@ -1787,7 +1788,7 @@ State 129
     math_operator       go to state 96
 
 
-State 130
+state 130
 
   102 expression: expression "/" . expression
 
@@ -1817,7 +1818,7 @@ State 130
     math_operator       go to state 96
 
 
-State 131
+state 131
 
   103 expression: expression "%" . expression
 
@@ -1847,7 +1848,7 @@ State 131
     math_operator       go to state 96
 
 
-State 132
+state 132
 
    99 expression: expression "+" . expression
 
@@ -1877,7 +1878,7 @@ State 132
     math_operator       go to state 96
 
 
-State 133
+state 133
 
   100 expression: expression "-" . expression
 
@@ -1907,7 +1908,7 @@ State 133
     math_operator       go to state 96
 
 
-State 134
+state 134
 
    95 expression: expression "<" . expression
 
@@ -1937,7 +1938,7 @@ State 134
     math_operator       go to state 96
 
 
-State 135
+state 135
 
    96 expression: expression ">" . expression
 
@@ -1967,7 +1968,7 @@ State 135
     math_operator       go to state 96
 
 
-State 136
+state 136
 
    93 expression: expression "<=" . expression
 
@@ -1997,7 +1998,7 @@ State 136
     math_operator       go to state 96
 
 
-State 137
+state 137
 
    94 expression: expression ">=" . expression
 
@@ -2027,7 +2028,7 @@ State 137
     math_operator       go to state 96
 
 
-State 138
+state 138
 
    97 expression: expression "==" . expression
 
@@ -2057,7 +2058,7 @@ State 138
     math_operator       go to state 96
 
 
-State 139
+state 139
 
    98 expression: expression "!=" . expression
 
@@ -2087,7 +2088,7 @@ State 139
     math_operator       go to state 96
 
 
-State 140
+state 140
 
    92 expression: expression "&&" . expression
 
@@ -2117,7 +2118,7 @@ State 140
     math_operator       go to state 96
 
 
-State 141
+state 141
 
    91 expression: expression "||" . expression
 
@@ -2147,7 +2148,7 @@ State 141
     math_operator       go to state 96
 
 
-State 142
+state 142
 
   106 expression: math_operator "(" . expression ")"
 
@@ -2177,7 +2178,7 @@ State 142
     math_operator       go to state 96
 
 
-State 143
+state 143
 
    25 parameter: "identifier" "=" . expression
 
@@ -2207,14 +2208,14 @@ State 143
     math_operator       go to state 96
 
 
-State 144
+state 144
 
    14 object_declaration: object_type "identifier" "(" parameter_list_or_empty ")" .
 
     $default  reduce using rule 14 (object_declaration)
 
 
-State 145
+state 145
 
    23 parameter_list: parameter_list "," . parameter
 
@@ -2223,14 +2224,14 @@ State 145
     parameter  go to state 185
 
 
-State 146
+state 146
 
    15 object_declaration: object_type "identifier" "[" expression "]" .
 
     $default  reduce using rule 15 (object_declaration)
 
 
-State 147
+state 147
 
    74 if_statement: "if" "(" . expression ")" statement_or_block_of_statements
    75             | "if" "(" . expression ")" statement_or_block_of_statements "else" statement_or_block_of_statements
@@ -2261,7 +2262,7 @@ State 147
     math_operator       go to state 96
 
 
-State 148
+state 148
 
    76 for_statement: "for" "(" . assign_statement_or_empty ";" expression ";" assign_statement_or_empty ")" statement_or_block_of_statements
 
@@ -2275,7 +2276,7 @@ State 148
     empty                      go to state 189
 
 
-State 149
+state 149
 
    77 print_statement: "print" "(" . expression ")"
 
@@ -2305,7 +2306,7 @@ State 149
     math_operator       go to state 96
 
 
-State 150
+state 150
 
    78 exit_statement: "exit" "(" . expression ")"
 
@@ -2335,42 +2336,42 @@ State 150
     math_operator       go to state 96
 
 
-State 151
+state 151
 
    65 statement_block: "{" statement_list "}" .
 
     $default  reduce using rule 65 (statement_block)
 
 
-State 152
+state 152
 
    67 statement_list: statement_list statement .
 
     $default  reduce using rule 67 (statement_list)
 
 
-State 153
+state 153
 
    72 statement: print_statement ";" .
 
     $default  reduce using rule 72 (statement)
 
 
-State 154
+state 154
 
    73 statement: exit_statement ";" .
 
     $default  reduce using rule 73 (statement)
 
 
-State 155
+state 155
 
    71 statement: assign_statement ";" .
 
     $default  reduce using rule 71 (statement)
 
 
-State 156
+state 156
 
    81 assign_statement: variable "=" . expression
 
@@ -2400,7 +2401,7 @@ State 156
     math_operator       go to state 96
 
 
-State 157
+state 157
 
    82 assign_statement: variable "+=" . expression
 
@@ -2430,7 +2431,7 @@ State 157
     math_operator       go to state 96
 
 
-State 158
+state 158
 
    83 assign_statement: variable "-=" . expression
 
@@ -2460,56 +2461,56 @@ State 158
     math_operator       go to state 96
 
 
-State 159
+state 159
 
    84 assign_statement: variable "++" .
 
     $default  reduce using rule 84 (assign_statement)
 
 
-State 160
+state 160
 
    85 assign_statement: variable "--" .
 
     $default  reduce using rule 85 (assign_statement)
 
 
-State 161
+state 161
 
    37 check_animation_parameter: object_type . "identifier"
 
     "identifier"  shift, and go to state 195
 
 
-State 162
+state 162
 
    35 animation_block: "animation" "identifier" "(" check_animation_parameter . ")" "{" statement_list "}"
 
     ")"  shift, and go to state 196
 
 
-State 163
+state 163
 
    36 animation_parameter: object_type "identifier" .
 
     $default  reduce using rule 36 (animation_parameter)
 
 
-State 164
+state 164
 
    26 forward_declaration: "forward" "animation" "identifier" "(" animation_parameter ")" .
 
     $default  reduce using rule 26 (forward_declaration)
 
 
-State 165
+state 165
 
   109 primary_expression: "(" expression ")" .
 
     $default  reduce using rule 109 (primary_expression)
 
 
-State 166
+state 166
 
    87 variable: "identifier" "[" expression . "]"
    89         | "identifier" "[" expression . "]" "." "identifier"
@@ -2547,14 +2548,14 @@ State 166
     "||"       shift, and go to state 141
 
 
-State 167
+state 167
 
    88 variable: "identifier" "." "identifier" .
 
     $default  reduce using rule 88 (variable)
 
 
-State 168
+state 168
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2576,7 +2577,7 @@ State 168
     $default  reduce using rule 108 (expression)
 
 
-State 169
+state 169
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2598,7 +2599,7 @@ State 169
     $default  reduce using rule 107 (expression)
 
 
-State 170
+state 170
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2623,7 +2624,7 @@ State 170
     $default  reduce using rule 101 (expression)
 
 
-State 171
+state 171
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2648,7 +2649,7 @@ State 171
     $default  reduce using rule 102 (expression)
 
 
-State 172
+state 172
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2673,7 +2674,7 @@ State 172
     $default  reduce using rule 103 (expression)
 
 
-State 173
+state 173
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2701,7 +2702,7 @@ State 173
     $default  reduce using rule 99 (expression)
 
 
-State 174
+state 174
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2729,7 +2730,7 @@ State 174
     $default  reduce using rule 100 (expression)
 
 
-State 175
+state 175
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2759,7 +2760,7 @@ State 175
     $default  reduce using rule 95 (expression)
 
 
-State 176
+state 176
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2789,7 +2790,7 @@ State 176
     $default  reduce using rule 96 (expression)
 
 
-State 177
+state 177
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2819,7 +2820,7 @@ State 177
     $default  reduce using rule 93 (expression)
 
 
-State 178
+state 178
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2849,7 +2850,7 @@ State 178
     $default  reduce using rule 94 (expression)
 
 
-State 179
+state 179
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2883,7 +2884,7 @@ State 179
     $default  reduce using rule 97 (expression)
 
 
-State 180
+state 180
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2917,7 +2918,7 @@ State 180
     $default  reduce using rule 98 (expression)
 
 
-State 181
+state 181
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -2953,7 +2954,7 @@ State 181
     $default  reduce using rule 92 (expression)
 
 
-State 182
+state 182
 
    91 expression: expression . "||" expression
    91           | expression "||" expression .
@@ -2990,7 +2991,7 @@ State 182
     $default  reduce using rule 91 (expression)
 
 
-State 183
+state 183
 
    91 expression: expression . "||" expression
    92           | expression . "&&" expression
@@ -3027,7 +3028,7 @@ State 183
     "||"       shift, and go to state 141
 
 
-State 184
+state 184
 
    25 parameter: "identifier" "=" expression .
    91 expression: expression . "||" expression
@@ -3065,14 +3066,14 @@ State 184
     $default  reduce using rule 25 (parameter)
 
 
-State 185
+state 185
 
    23 parameter_list: parameter_list "," parameter .
 
     $default  reduce using rule 23 (parameter_list)
 
 
-State 186
+state 186
 
    74 if_statement: "if" "(" expression . ")" statement_or_block_of_statements
    75             | "if" "(" expression . ")" statement_or_block_of_statements "else" statement_or_block_of_statements
@@ -3110,28 +3111,28 @@ State 186
     "||"       shift, and go to state 141
 
 
-State 187
+state 187
 
    76 for_statement: "for" "(" assign_statement_or_empty . ";" expression ";" assign_statement_or_empty ")" statement_or_block_of_statements
 
     ";"  shift, and go to state 200
 
 
-State 188
+state 188
 
    79 assign_statement_or_empty: assign_statement .
 
     $default  reduce using rule 79 (assign_statement_or_empty)
 
 
-State 189
+state 189
 
    80 assign_statement_or_empty: empty .
 
     $default  reduce using rule 80 (assign_statement_or_empty)
 
 
-State 190
+state 190
 
    77 print_statement: "print" "(" expression . ")"
    91 expression: expression . "||" expression
@@ -3168,7 +3169,7 @@ State 190
     "||"       shift, and go to state 141
 
 
-State 191
+state 191
 
    78 exit_statement: "exit" "(" expression . ")"
    91 expression: expression . "||" expression
@@ -3205,7 +3206,7 @@ State 191
     "||"       shift, and go to state 141
 
 
-State 192
+state 192
 
    81 assign_statement: variable "=" expression .
    91 expression: expression . "||" expression
@@ -3243,7 +3244,7 @@ State 192
     $default  reduce using rule 81 (assign_statement)
 
 
-State 193
+state 193
 
    82 assign_statement: variable "+=" expression .
    91 expression: expression . "||" expression
@@ -3281,7 +3282,7 @@ State 193
     $default  reduce using rule 82 (assign_statement)
 
 
-State 194
+state 194
 
    83 assign_statement: variable "-=" expression .
    91 expression: expression . "||" expression
@@ -3319,21 +3320,21 @@ State 194
     $default  reduce using rule 83 (assign_statement)
 
 
-State 195
+state 195
 
    37 check_animation_parameter: object_type "identifier" .
 
     $default  reduce using rule 37 (check_animation_parameter)
 
 
-State 196
+state 196
 
    35 animation_block: "animation" "identifier" "(" check_animation_parameter ")" . "{" statement_list "}"
 
     "{"  shift, and go to state 203
 
 
-State 197
+state 197
 
    87 variable: "identifier" "[" expression "]" .
    89         | "identifier" "[" expression "]" . "." "identifier"
@@ -3343,14 +3344,14 @@ State 197
     $default  reduce using rule 87 (variable)
 
 
-State 198
+state 198
 
   106 expression: math_operator "(" expression ")" .
 
     $default  reduce using rule 106 (expression)
 
 
-State 199
+state 199
 
    74 if_statement: "if" "(" expression ")" . statement_or_block_of_statements
    75             | "if" "(" expression ")" . statement_or_block_of_statements "else" statement_or_block_of_statements
@@ -3373,7 +3374,7 @@ State 199
     variable                          go to state 116
 
 
-State 200
+state 200
 
    76 for_statement: "for" "(" assign_statement_or_empty ";" . expression ";" assign_statement_or_empty ")" statement_or_block_of_statements
 
@@ -3403,21 +3404,21 @@ State 200
     math_operator       go to state 96
 
 
-State 201
+state 201
 
    77 print_statement: "print" "(" expression ")" .
 
     $default  reduce using rule 77 (print_statement)
 
 
-State 202
+state 202
 
    78 exit_statement: "exit" "(" expression ")" .
 
     $default  reduce using rule 78 (exit_statement)
 
 
-State 203
+state 203
 
    35 animation_block: "animation" "identifier" "(" check_animation_parameter ")" "{" . statement_list "}"
 
@@ -3437,14 +3438,14 @@ State 203
     variable          go to state 116
 
 
-State 204
+state 204
 
    89 variable: "identifier" "[" expression "]" "." . "identifier"
 
     "identifier"  shift, and go to state 210
 
 
-State 205
+state 205
 
    74 if_statement: "if" "(" expression ")" statement_or_block_of_statements .
    75             | "if" "(" expression ")" statement_or_block_of_statements . "else" statement_or_block_of_statements
@@ -3454,21 +3455,21 @@ State 205
     $default  reduce using rule 74 (if_statement)
 
 
-State 206
+state 206
 
    63 statement_or_block_of_statements: statement_block .
 
     $default  reduce using rule 63 (statement_or_block_of_statements)
 
 
-State 207
+state 207
 
    64 statement_or_block_of_statements: statement .
 
     $default  reduce using rule 64 (statement_or_block_of_statements)
 
 
-State 208
+state 208
 
    76 for_statement: "for" "(" assign_statement_or_empty ";" expression . ";" assign_statement_or_empty ")" statement_or_block_of_statements
    91 expression: expression . "||" expression
@@ -3505,7 +3506,7 @@ State 208
     "||"       shift, and go to state 141
 
 
-State 209
+state 209
 
    35 animation_block: "animation" "identifier" "(" check_animation_parameter ")" "{" statement_list . "}"
    67 statement_list: statement_list . statement
@@ -3526,14 +3527,14 @@ State 209
     variable          go to state 116
 
 
-State 210
+state 210
 
    89 variable: "identifier" "[" expression "]" "." "identifier" .
 
     $default  reduce using rule 89 (variable)
 
 
-State 211
+state 211
 
    75 if_statement: "if" "(" expression ")" statement_or_block_of_statements "else" . statement_or_block_of_statements
 
@@ -3555,7 +3556,7 @@ State 211
     variable                          go to state 116
 
 
-State 212
+state 212
 
    76 for_statement: "for" "(" assign_statement_or_empty ";" expression ";" . assign_statement_or_empty ")" statement_or_block_of_statements
 
@@ -3569,28 +3570,28 @@ State 212
     empty                      go to state 189
 
 
-State 213
+state 213
 
    35 animation_block: "animation" "identifier" "(" check_animation_parameter ")" "{" statement_list "}" .
 
     $default  reduce using rule 35 (animation_block)
 
 
-State 214
+state 214
 
    75 if_statement: "if" "(" expression ")" statement_or_block_of_statements "else" statement_or_block_of_statements .
 
     $default  reduce using rule 75 (if_statement)
 
 
-State 215
+state 215
 
    76 for_statement: "for" "(" assign_statement_or_empty ";" expression ";" assign_statement_or_empty . ")" statement_or_block_of_statements
 
     ")"  shift, and go to state 216
 
 
-State 216
+state 216
 
    76 for_statement: "for" "(" assign_statement_or_empty ";" expression ";" assign_statement_or_empty ")" . statement_or_block_of_statements
 
@@ -3612,7 +3613,7 @@ State 216
     variable                          go to state 116
 
 
-State 217
+state 217
 
    76 for_statement: "for" "(" assign_statement_or_empty ";" expression ";" assign_statement_or_empty ")" statement_or_block_of_statements .
 

@@ -1,6 +1,10 @@
 
 *.DS_store
 *.o
+*.yy.c
+*.tab.*
+*.output
 gpl
 */results/
+*.tar.gz
 
