@@ -1,0 +1,152 @@
+<h1>The Fifth Project (p5)</h1>
+<p>Ver. 6 May 2019</p>
+<ul>
+<li>Initial version.</li>
+</ul>
+<h2>Errata to gpl.y</h2>
+<p>The purpose of this errata is to allow game objects to be declared without parentheses. For example,
+<code>Triangle t;</code></p>
+<ol>
+<li>
+<p><span style="color:red">Original:</span> <pre>object_declaration:
+    object_type T_ID <strong>T_LPAREN</strong> parameter_list_or_empty <strong>T_RPAREN</strong>
+</pre><span style="color:LimeGreen">Revised:</span> <pre>
+object_declaration:
+    object_type T_ID parameter_list_or_empty
+</pre>
+  NOTE: this changes $4 to $3. Be sure to update the action code for this rule, replacing each occurrence of $4 with $3.</p>
+</li>
+<li>
+<p><span style="color:red">Original:</span> <pre>parameter_list_or_empty:
+    parameter_list
+    | empty {$$=nullptr;}
+    ;
+</pre><span style="color:LimeGreen">Revised:</span><pre>parameter_list_or_empty:
+    <strong>T_LPAREN</strong> parameter_list <strong>T_RPAREN</strong> <strong>{$$=$2;}</strong>
+    <strong>| T_LPAREN empty T_RPAREN {$$=nullptr;}</strong>
+    | empty {$$=nullptr;}
+</pre></p>
+</li>
+</ol>
+<h2>Description</h2>
+<p>This project implements the functionality for event blocks (e.g., <code>on leftarrow {...}</code>) and statements.</p>
+<ol>
+<li>
+<p>In GPL, assignment can occur on <code>int</code>, <code>double</code>, <code>string</code>, and <code>Animation_block*</code>. At the C++ level, that means that functions are required that allow a symbol's value to change. Adjust the signatures of the Symbol class's <code>as_*</code> functions associated with these types. Returning by reference allows these to appear on the left-hand side of expressions. For example:</p>
+<pre><code>my_symbol-&gt;as_double()=3.14; //change the symbol's value to 3.14
+</code></pre>
+<p>This can be accomplished by simply removing <code>const</code> and adding <code>&amp;</code> to the return type. There is no need to change the body of these functions, just change their signatures in the header and source files.</p>
+<p>The provided <code>Window</code> class assumes your Symbol class has the signatures as shown below. If your <code>as_(int|double|string)</code> functions return pointers, modify the Window code to dereference and change their values. Compiler errors in Window.cpp will direct you to the four lines of code to adjust.</p>
+<pre><code>// Symbol.h
+int&amp; as_int();                             //was: int as_int() const;
+double&amp; as_double();                       //was: double as_double() const;
+std::string&amp; as_string();                  //was: std::string as_string() const;
+Animation_block*&amp; as_animation_block();    //was as_animation_block() const;
+
+int&amp; as_int(int);                          //was: int as_int(int) const;
+double&amp; as_double(int);                    //was: double as_double(int) const;
+std::string&amp; as_string(int);               //was: std::string as_string(int) const;
+</code></pre>
+</li>
+<li>
+<p>The <code>Variable</code> and <code>Member_variable</code> classes must support being changed by <code>=</code>, <code>+=</code>, <code>-=</code>, <code>++</code>, and <code>--</code>. For example:</p>
+<pre><code>my_rect.x += 30;
+var = 9.2;
+my_triangle.height++;
+</code></pre>
+<p>Create a member function for each of the operators in both classes:</p>
+<pre><code>virtual void assign(Constant* cptr);
+virtual void plus_equals(Constant* cptr);
+virtual void minus_equals(Constant* cptr);
+virtual void plus_plus();
+virtual void minus_minus();
+</code></pre>
+<p>Each of these functions should make the appropriate modification to the variable's underlying symbol. Consult the GPL manual for the types each operator may operate on (e.g., <code>-=</code> is only valid for <code>int</code> and <code>double</code>).</p>
+</li>
+<li>
+<p><em>Overview</em>: Statements should be architected similarly to operators. An abstract base class <code>Statement</code> is provided. It has a pure virtual execute function: <code>virtual void execute()=0;</code>  This function is overridden in each statement subclass, similar to how the <code>evaluate()</code> function is overridden in the expression subclasses. There is also a protected <code>next</code> pointer provided which allows statements to be chained together. Statements are chained together in the <code>statement_list</code> production. (Note this is semantically similar to how parameters were chained together in the <code>parameter_list</code> production). The <code>Statement</code> class also has an <code>append_statement()</code> function. Call it to add a statement to the end of the statement chain. Each subclass has the following private data members:</p>
+<ul>
+<li>class <code>Print_statement</code><ul>
+<li>line number</li>
+<li>Expression pointer</li>
+</ul>
+</li>
+<li>class <code>If_statement</code><ul>
+<li>Expression pointer</li>
+<li>Statement pointer (for the if-clause)</li>
+<li>Statement pointer (for the optional else-clause)</li>
+</ul>
+</li>
+<li>class <code>Assignment_statement</code><ul>
+<li>Variable pointer (LHS)</li>
+<li>Expression pointer (RHS, not present with ++ and --)</li>
+<li>operator type (=, +=, -=, ++, --)</li>
+<li><em>Alternatively</em>, derive a separate classes for each specific type of assignment statement.</li>
+</ul>
+</li>
+<li>class <code>Exit_statement</code><ul>
+<li>Expression pointer (evaluates to integer exit status)</li>
+</ul>
+</li>
+<li>class <code>For_statement</code><ul>
+<li>Statement pointer (initializer, <em>can be <code>nullptr</code></em>)</li>
+<li>Expression pointer (condition, evaluates to int)</li>
+<li>Statement pointer (incrementor, <em>can be <code>nullptr</code></em>)</li>
+<li>Statement pointer (body of loop)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Note</strong>: To ensure that the entire chain of statements in a block are executed, the last statement of every <code>execute()</code> function should be:</p>
+<pre><code>if(next!=nullptr)
+  next-&gt;execute(); //execute next statement
+</code></pre>
+</li>
+<li>
+<p>Begin by coding a <code>Print</code> class, a class derived from the <code>Statement</code> class that handles the GPL print statement. Recall usage of the GPL print statement:</p>
+<pre><code>print("value=" + 42 + ", x=" + x); 
+//displays: print[6]: value=42, x=38.2
+//In this example the 6 in square braces is the line number
+</code></pre>
+<p>The constructor to this class should take the current line number (stored in the <code>line_count</code> variable in <code>gpl.y</code>) and an expression pointer. The execute() member function should print in the format shown in the example above. Don't forget to make the last line of the execute function: <code>if(next!=nullptr) next-&gt;execute();</code> Write a destructor that releases (deletes) the expression pointer.</p>
+</li>
+<li>
+<p>Modify <code>gpl.y</code> to integrate the new Print statement class:</p>
+<ul>
+<li>In the production rule for <code>print_statment:</code>, code an action to create a <code>Print</code> object. A new <code>%type</code> entry will be required (of type <code>Statement*</code>. The newly allocated object will be assigned to $$.</li>
+<li>Add a <code>%type</code> entry for <code>statement</code>. Code the <code>print_statement</code> rule for <code>statement</code> (<code>$$=$1;</code>)</li>
+<li>Add a <code>%type</code> entry for <code>statement_list</code>. Code both rules for this production. The <code>statement_list</code> rule invokes the <code>append_statement function</code>: <code>$1-&gt;append_statement($2); $$=$1;</code>. The <code>statement</code> rule is simply <code>$$=$1;</code>.</li>
+<li>Add a <code>%type</code> entry and code action for propgating the <code>Statement*</code> through the <code>statement_block</code> and <code>statement_or_block_of_statements</code> productions.</li>
+</ul>
+</li>
+<li>
+<p>The skeleton of the <code>Event_manager</code> class is provided. GPL events (such as
+   <code>on downarrow { ... }</code>) are collected by the event manager and executed
+   automatically by the <code>Window</code> class. A <code>Statement*</code> points to the first
+   statement of a linked list of statements comprising the event block. Because
+   there can be more than one event block written for each event (e.g.,
+   multiple downarrow event blocks), the proper data structure to handle an
+   event type is a vector of <code>Statement*</code>. Finally, there are several events
+   handled by GPL (not just downarrow), So <code>Event_manager</code> should have an array
+   of vectors, one for each type of event (downarrow, uparrow, jkey, etc.). The
+   size of the array is given by <code>Window::NUMBER_OF_KEYS</code>:</p>
+<pre><code>std::vector&lt;Statement*&gt; events[Window::NUMBER_OF_KEYS]; //private data of Event_manager, an array of vectors.
+</code></pre>
+<p>An enumeration type, <code>Window::Keystroke</code> has been defined for the different
+events. These enumerations start at zero and are contiguous so work nicely
+as array indices. Usage example: To access the downarrow event blocks in the
+vector: </p>
+<pre><code>Window::Keystroke thekey=Window::JKEY;
+//...
+events[thekey]; //this is a vector of Statement pointers for the J-key
+</code></pre>
+<p>Write the <code>Event_manager::add_handler</code> and <code>Event_manager::execute_handlers</code> member functions. Each is only a couple lines long. The destructor should iterate through the array of vectors, releasing (deleting) each Statement* in each vector.</p>
+</li>
+<li>
+<p>For each rule in the <code>keystroke:</code> production, assign the appropriate Window::Keystroke enumeration. Add the appropriate %type</p>
+</li>
+<li>
+<p>Add an action for the rule to the <code>on_block:</code> production:</p>
+<pre><code>        { Event_manager::instance().add_handler($2, $3); }
+</code></pre>
+</li>
+</ol>
