@@ -459,9 +459,8 @@ Constant* Floor::evaluate()
   try{
     lhs_constant= new Integer_constant(lhs_constant->as_int());
   }catch(...){
-    double d = lhs_constant->as_double();
-    if(d < 0)
-      d--;
+    double j = lhs_constant->as_double();
+    int d = std::floor(j);
     lhs_constant= new Integer_constant(d);
   }
   return ret(lhs_constant);

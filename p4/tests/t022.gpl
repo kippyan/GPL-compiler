@@ -1,0 +1,5 @@
+string window_title = "p4 t022.gpl";
+
+rectangle my_rectangle();
+
+int x = my_rectangle.q;

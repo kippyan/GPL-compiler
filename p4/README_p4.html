@@ -1,0 +1,226 @@
+<h1>The Fourth Project (p4)</h1>
+<p>Ver. 24 April 2019</p>
+<ul>
+<li>Corrected listed functions in step #10</li>
+</ul>
+<p>Ver. 22 April 2019</p>
+<ul>
+<li>Reworked game object code and updated step #10. More to come.</li>
+</ul>
+<p>Ver. 19 April 2019</p>
+<ul>
+<li>Some minor textual edits. More substantive edits to come.</li>
+</ul>
+<p>Ver. 17 April 2019</p>
+<ul>
+<li>Initial version. Step 13 to be revised.</li>
+</ul>
+<h2>Summary</h2>
+<p>Support for game objects (Rectangle, Textbox, etc.) are added as well as forward declarations of animation blocks.</p>
+<h2>Manifest</h2>
+<pre><code>    ./src/p4/README_p4.html         You are reading this right now.
+    ./src/p4/README_p4.markdown     Source file used to generate html page
+
+    ./src/p4/Animation_block.cpp    Animation code block class
+    ./src/p4/Animation_block.h
+
+    ./src/p4/Circle.cpp             Circle game object class      
+    ./src/p4/Circle.h
+
+    ./src/p4/default_pixmap.h       A default image used by gpl
+
+    ./src/p4/Event_manager.cpp      A stub class for managing GPL events. Expanded in p5
+    ./src/p4/Event_manager.h
+
+    ./src/p4/Game_object.cpp        The base class for the game objects
+    ./src/p4/Game_object.h
+
+    ./src/p4/Pixmap.cpp             Pixmap game object class
+    ./src/p4/Pixmap.h
+
+    ./src/p4/Rectangle.cpp          Rectangle game object class
+    ./src/p4/Rectangle.h
+
+    ./src/p4/Textbox.cpp            Textbox game object class
+    ./src/p4/Textbox.h
+
+    ./src/p4/Triangle.cpp           Triangle game object class
+    ./src/p4/Triangle.h
+
+    ./src/p4/Window.cpp             Class that encapsulates code used to render the graphics.
+    ./src/p4/Window.h
+</code></pre>
+<h2>Project Description</h2>
+<ol>
+<li>
+<p>Add support for the following game object types (as pointers) to class <code>Symbol</code>:</p>
+<ul>
+<li><code>Rectangle*</code></li>
+<li><code>Circle*</code></li>
+<li><code>Textbox*</code></li>
+<li><code>Triangle*</code></li>
+<li><code>Pixmap*</code></li>
+</ul>
+<p>This requires writing:</p>
+<ul>
+<li>Two constructors for each (individual objects and element of an array)</li>
+<li>Two <code>as_*</code> functions for each. For example: <code>Rectangle* Symbol::as_rectangle() const</code>. Note that the <code>as_*</code> functions return a pointer to the game object, not the actual game object.</li>
+</ul>
+</li>
+<li>
+<p>Add the ability to print the five different game objects in <code>Symbol::operator&lt;&lt;</code>. The five game object classes already support the ability to print via <code>operator&lt;&lt;</code>. Printing out a game object is as straightforward as printing out a string.</p>
+</li>
+<li>
+<p>Add the same support for <code>Animation_block*</code> to class <code>Symbol</code> as was done with the game objects above. Note, there are never arrays of <code>Animation_blocks</code>. Add the ability to print animation blocks in <code>Symbol</code> as well. All that needs to be printed is "<em>animation_block</em>" followed by the name of the block. For example: <code>animation_block mycoolanimation</code>. Don't forget to add the member function: <code>Animation_block* Symbol::as_animation_block()</code>.</p>
+</li>
+<li>
+<p>Derive six additional classes from <code>Constant</code>: one for each of the five game objects and one for the animation block. The private data member of each is a pointer. For example, </p>
+<pre><code>class Rectangle_constant : public Constant {
+  private:
+    Rectangle* data;
+  public:
+    Rectangle_constant(Rectangle* d) : data(d) {}
+    virtual int         as_int()    const { throw RECTANGLE; }
+    virtual double      as_double() const { throw RECTANGLE; }
+    virtual std::string as_string() const { throw RECTANGLE; }
+    virtual Rectangle*  as_rectangle() const { return data; }
+    virtual Circle*     as_circle()    const { throw  RECTANGLE; }
+    virtual Textbox*    as_textbox()   const { throw  RECTANGLE; }
+    virtual Triangle*   as_triangle()  const { throw  RECTANGLE; }
+    virtual Pixmap*     as_pixmap()    const { throw  RECTANGLE; }
+    virtual Animation_block* as_animation_block() const { throw RECTANGLE; }
+    virtual Gpl_type    type()      const { return RECTANGLE; }
+};
+</code></pre>
+</li>
+<li>
+<p>Update <code>Variable::evaluate()</code> to handle the six new classes derived from Constant.</p>
+</li>
+<li>
+<p>Previously, the actions for the <code>variable_declaration</code> production rules were coded to create int, string, and double <code>Symbol</code>s and insert them into a <code>Symbol_table</code>.
+Now, the actions for the  <code>object_declaration</code> production rules will be coded to create <code>Symbol</code>s (or an array of them) for <code>Rectangle</code>, <code>Circle</code>, <code>Textbox</code>, <code>Triangle</code>, and <code>Pixmap</code>.  Examples of object declarations:</p>
+<pre><code>triangle my_triangle(x = 100, y = 100);
+rectangle some_rect(x = 42, y = 2, h = 100, w = 200, green = 1.0);
+</code></pre>
+<p>When declaring single game objects, (i.e., the
+first rule of the <code>object_declaration</code> production) <code>parameter_list_or_empty</code> presents a
+special challenge because parameters are parsed before <code>object_declaration</code>
+is matched. This is a challenge because parameter errors include the name of
+the game object being declared. The solution is to delay processing parameters
+until after the game object itself is created as a symbol. As parameters are
+parsed, a linked list of them is built and passed to the
+<code>object_declaration</code> production to be validated after the game object is added
+to the symbol table.  Add a structure to <code>parser.h</code> to handle the linked list of
+parameters:</p>
+<pre><code>struct Parameter {
+      Expression* expression;
+      std::string name;
+      Parameter* next;
+      ~Parameter() { delete next; }
+};
+</code></pre>
+</li>
+<li>
+<p>Write the action for the <code>parameter</code> production. The action simply creates and initializes a new <code>Parameter</code> object (<code>next</code> is initialized to <code>nullptr</code>). Assign the new structure object to <code>$$</code>.</p>
+<p>Add a new type to the <code>%union</code> in <code>gpl.y</code>: <code>Parameter* union_parameter_ptr</code>. Add a <code>%type</code> directive for <code>parameter</code>. At this point gpl.y (and the rest of the project) is incomplete but build. Remove all compiling errors before continuing.</p>
+</li>
+<li>
+<p>Write the action for the <code>parameter_list</code> production.  Each parameter is added to the list of
+     previous parameters by finding the last node in the list 
+     (where <code>next==nullptr</code>). For this rule in the <code>parameter_list</code> production:</p>
+<pre><code>parameter_list T_COMMA parameter
+</code></pre>
+<p><code>parameter_list</code> contains the current linked list, and parameter contains
+  the new parameter to be added to the end of the list.</p>
+</li>
+<li>
+<p>To the <code>parameter_list_or_empty</code> production, add <code>$$=nullptr</code> to the <code>empty</code> rule.</p>
+</li>
+<li>
+<p>Add code to handle the <code>object_declaration</code> production (declare game objects and
+   add them to the symbol table). A good starting place is to adapt a copy of
+   the code that handles <code>variable_declaration</code>. Like <code>variable_declaration</code>, the
+   <code>object_declaration</code> production has two rules, one for a single object and
+   one for an array of objects. The rule for single object declaration 
+   iterates through the linked list of parameters. For each parameter check that each
+   is a valid game object parameter and that its value is of the correct
+   type.  All parameters in gpl are either int, double, string, or
+   <code>Animation_block*.</code>  </p>
+<p>Each game object class has a static member function to validate the type of
+member variables.  This function returns the <code>Gpl_type</code> of the variable
+whose  name is provided as a string.  An <code>out_of_range</code> exception is thrown
+if the provided name is not a member variable.</p>
+<pre><code>Gpl_type Rectangle::get_member_variable_type(const string&amp; name) const
+Gpl_type Circle::get_member_variable_type(const string&amp; name) const
+Gpl_type Textbox::get_member_variable_type(const string&amp; name) const
+Gpl_type Triangle::get_member_variable_type(const string&amp; name) const
+Gpl_type Pixmap::get_member_variable_type(const string&amp; name) const
+</code></pre>
+<p>Example invocation:</p>
+<pre><code>if(Circle::get_member_variable_type("radius")!=DOUBLE) //static fn. No object required
+  ...
+</code></pre>
+<p>Each game object class has member functions to set and get the value of a
+member variable whose name is provided as a string.</p>
+<pre><code>Game_object::set_member_variable(string name, int               value)
+Game_object::set_member_variable(string name, double            value)
+Game_object::set_member_variable(string name, string            value)
+Game_object::set_member_variable(string name, Animation_block*  value)
+
+Game_object::get_member_variable(string name, int&amp;              value)
+Game_object::get_member_variable(string name, double&amp;           value)
+Game_object::get_member_variable(string name, string&amp;           value)
+Game_object::get_member_variable(string name, Animation_block*&amp; value)
+</code></pre>
+<p>This member function will set the member variable given by name to value.
+The value may be an int, double, string, or <code>Animation_block*</code> The function
+is overloaded for the four types of value (that is, there are four versions
+of the function).</p>
+<p>The <code>set_*</code>/<code>get_*</code> functions will throw the following self-explanatory exceptions (this enumeration is defined in <code>gpl_types.h</code>):</p>
+<pre><code>enum Status {
+     MEMBER_NOT_OF_GIVEN_TYPE,
+     MEMBER_NOT_DECLARED
+     };
+</code></pre>
+</li>
+<li>
+<p>Add code to handle the other two rules in the variable production. These
+    two rules handle variables that are members of game objects. For example:</p>
+<pre><code>my_circle.x
+my_list_of_triangles[3].y
+</code></pre>
+<p>Derive a class from Variable named <code>Member_variable</code>. It will
+   have one private data string: the name of the game object's data member.
+   In the above examples that would be "x" and "y". The <code>evaluate()</code> function
+   interrogates the game object to obtain the value of the member variable
+   which is returned as a constant object. <code>Game_object::get_member_variable()</code>
+   is used to get the variable's value.</p>
+</li>
+<li>
+<p>Some evaluate functions for the expressions classes may need to be updated to
+    gracefully handle errors when game objects are errantly used in binary
+    expressions (e.g. <code>Plus::evaluate()</code>, <code>Greater::evaluate()</code>, etc.).</p>
+</li>
+<li>
+<p><strong>DO NOT DO THIS STEP YET</strong> Add code to handle the <code>forward_declaration</code> production. Recall:</p>
+<pre><code>forward animation some_anim_object_name(triangle some_game_object_name);
+</code></pre>
+<p>There are two objects that are created and added to the symbol table in a
+ forward declaration: a game object (inside the parentheses) and an
+ animation block (named before the parentheses).</p>
+<p>The <code>Symbol</code> for the game object should be created in the
+ <code>animation_parameter</code> production. and assigned to <code>$$</code>.
+ Because this game object serves a special purpose (as a reference for an
+ actual game object when the animation block is assigned to a game object)
+ there are two member functions that should be called when the game object
+ is created: <code>never_animate()</code>, and <code>never_draw()</code>.</p>
+<p>The <code>Symbol</code> for the animation block should be created in the
+ <code>forward_declaration</code> production. The animation block has an initialize
+ function that should be called on the newly-created animation block:
+ <code>initialize($5, *$3)</code>. These input arguments are correct for the
+ <code>forward_declaration</code> production (<code>$5</code> is the symbol for the game object and
+ <code>*$3</code> is the name of the animation block variable).  Assuming there are no
+ errors (such as previously declared variable) then both symbols should be
+ added to the symbol table.</p>
+</li>
+</ol>

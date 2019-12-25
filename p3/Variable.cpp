@@ -46,7 +46,7 @@ Constant* Variable::evaluate(){
       return evaluated_constant;
     }
     delete array_index_expression;
-    switch(symbol->get_type() - ARRAY){
+    switch(symbol->get_type() ^ ARRAY){
       case INT:
       {
         evaluated_constant = new Integer_constant(symbol->int_at(index));
