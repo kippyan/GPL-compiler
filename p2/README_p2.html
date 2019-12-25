@@ -1,0 +1,188 @@
+<h1>The Second Project (p2)</h1>
+<p>Ver. 20 February 2019</p>
+<ul>
+<li>Initial version</li>
+</ul>
+<h2>Summary</h2>
+<p>For this second project, symbols and symbol tables are introduced to manage the declaration and access of variables that are created in GPL.</p>
+<h2>Manifest</h2>
+<p>The tarball expands into the following file hierarchy:</p>
+<pre><code>    ./src/p2/README_p2.markdown     Source file used to generate html page
+    ./src/p1/README_p2.html         You are reading this right now.
+
+    ./src/p2/gpl_type.h             Enumerations and function prototypes for use in managing types in the GPL language
+    ./src/p2/gpl_type.cpp           Source to utility functions declared in header file.
+    ./src/p2/Makefile               Updated Makefile.
+    ./src/p2/gpl.cpp                Updated gpl.cpp.
+    ./src/p2/tests/*                Testing suite for P2
+
+    ./src/p2/sample_singleton.cpp   Sample code--implementing Singleton class
+</code></pre>
+<h2>Project description</h2>
+<ol>
+<li>
+<p>A <code>Symbol</code> class will have a private data member that is a union to manage each type of variable that the GPL language supports. For this project, GPL integers, doubles, and strings will be supported. Each member of the union should be a pointer to the type. Creating a constructor for each data member eases its use in <code>Symbol</code>'s initialization list. Example of union declaration:
+        union symbol_type {
+          double* double_pointer;
+          //etc. for int and string</p>
+<pre><code>  //constructors to ease initialization of union variables
+  symbol_type(double* val) : double_pointer(val){}
+  //etc. for int and string
+};
+</code></pre>
+</li>
+<li>
+<p>Write the <code>Symbol</code> class.  </p>
+<p>Private data:</p>
+<pre><code>std::string name; //the name of the variable
+symbol_type value; //the contents of the variable
+Gpl_type type;  //the type of the variable. See gpl_type.h
+int count; //used to store the size if the variable is an array
+</code></pre>
+<p>Public member functions:</p>
+<pre><code>Symbol(const std::string&amp; name, double* value); //for double variable
+Symbol(const std::string&amp; name, double* value, int count); //for double array
+//etc. for int and string
+
+Gpl_type get_type();
+std::string get_name();
+friend std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, const Symbol&amp;);
+</code></pre>
+<p>The actual value (or array of values) is created using <code>new</code> outside of the constructor. The constructor takes a pointer to the newly-allocated value(s). The destructor (<code>Symbol::~Symbol</code>) is responsible for releasing the memory (<code>delete</code>, or <code>delete []</code>, depending on whether value points to a single variable or array of variables).</p>
+</li>
+<li>
+<p>Test the <code>Symbol</code> class. Write a test program that creates various Symbols. Run the test code through <code>valgrind</code> to confirm that there are no memory leaks:</p>
+<pre><code>valgrind ./a.out
+</code></pre>
+</li>
+<li>
+<p>Write the <code>Symbol_table</code> class.  The <code>Symbol_table</code> class manages an <code>unordered_map</code> with the symbol's name as the key and a pointer to the <code>Symbol</code> object as the value. Smart pointers are used to avoid memory leaks.</p>
+<pre><code>class Symbol_table {
+  public:
+    std::shared_ptr&lt;Symbol&gt; lookup(const std::string&amp; name);
+    bool insert(std::shared_ptr&lt;Symbol&gt; sym);
+    friend std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, const Symbol_table&amp;);
+  private:
+    std::unordered_map&lt;std::string, std::shared_ptr&lt;Symbol&gt;&gt; symbols;
+};
+</code></pre>
+<p><code>Symbol_table::lookup</code> -- Return the named <code>Symbol</code> object if it is found in the <code>unordered_map</code>, and <code>nullptr</code> otherwise. Note that <code>unordered_map::find</code> should be used to search the keys for the symbol's name. Using <code>[ ]</code> will create an entry if it doesn't already exist.</p>
+<p><code>Symbol_table::insert</code> --  If the <code>Symbol</code> input parameter already exists in the <code>unordered_map</code> return <code>false</code>. Otherwise add the <code>Symbol</code> to the map and return <code>true</code>.</p>
+<p><code>Symbol_table::operator&lt;&lt;</code> -- Print out all of the symbols in the table sorted by name. The format of the output is: <strong><code>type name = value</code></strong>. For example:</p>
+<pre><code>int a = 42
+double b = 3.14159
+int c = 42
+string d = "Hello world"
+int nums[0] = 42
+int nums[1] = 42
+int nums[2] = 42
+</code></pre>
+<p>Note that the double-quotes surrounding the string are added by the printing routine. They are not be part of the string's value. The flex pattern action from the previous project strips the quotes off.</p>
+</li>
+<li>
+<p>Write a test program to ensure the <code>Symbol_table</code> class is bug-free. Run the test code through <code>valgrind</code> to confirm that there are no memory leaks:</p>
+</li>
+<li>
+<p>Write the <code>Table_handler</code> class. This class is a <em>singleton</em> class which ensures that no more than one <code>Table_handler</code> object will exist in the application. See <code>sample_singleton.cpp</code> for an example of how to structure a class as a singleton. (Be sure to move <code>sample_singleton.cpp</code> out of the project directory or the Makfile will try to add it to the project build.) A <code>std::vector</code> should be used as the private data to manage multiple symbol tables.</p>
+<pre><code>static std::vector&lt;std::shared_ptr&lt;Symbol_table&gt;&gt; tables;
+</code></pre>
+<p>The public member functions include:</p>
+<ul>
+<li>
+<p><code>static Table_handler&amp; instance()</code> -- Return the singleton instance. Additionally, if the vector of <code>Symbol_table</code> instances is empty, call <code>push_table()</code> to add a new <code>Symbol_table</code> object before returning the singleton.</p>
+</li>
+<li>
+<p><code>void push_table()</code> -- Create a new <code>Symbol_table</code> and <code>push_back</code> onto the vector.</p>
+</li>
+<li>
+<p><code>void pop_table()</code> -- If more than one table is on the vector <code>pop_back()</code> to remove it. If there is only one table on the vector, throw an exception:</p>
+<pre><code>    #include&lt;stdexcept&gt;
+    throw std::underflow_error("Can't pop global symbol table");
+</code></pre>
+</li>
+<li>
+<p><code>bool insert(std::shared_ptr&lt;Symbol&gt; sym)</code> -- Add a symbol to the top/last/back table in the vector via a call to <code>Symbol_table::insert</code>.</p>
+</li>
+<li>
+<p><code>std::shared_ptr&lt;Symbol&gt; lookup(const std::string&amp; name)</code> -- Iterate through the symbol tables from back to front, calling <code>Table_handler::lookup</code> on each. Return the first match found. Return <code>nullptr</code> if the symbol is undefined.</p>
+</li>
+<li>
+<p><code>bool defined_in_current_scope(const std::string&amp; name)</code> -- Search the top/last/back table for the named symbol. Return true if it is defined, false otherwise. Used to check for variable redefinition errors.</p>
+</li>
+<li>
+<p><code>friend std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, Table_handler&amp; sh)</code> - Iterate through the symbol tables from back to front, printing each.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Write a test program to ensure <code>Table_handler</code> is bug-free. Run the test code through <code>valgrind</code> to ensure it is free of memory leaks.</p>
+</li>
+<li>
+<p>In <code>gpl.y</code>, the specific type of the <code>simple_type</code> production should be made available to the <code>variable_declaration</code> production. Assign the corresponding <code>Gpl_type</code> to each rule:</p>
+<pre><code>simple_type:
+    T_INT      {$$=INT;}
+    | T_DOUBLE {$$=DOUBLE;}
+    | T_STING  {$$=STRING;}
+</code></pre>
+</li>
+<li>
+<p>Assigning a <code>Gpl_type</code> to <code>simple_type</code> requires two additional configurations:</p>
+<ol>
+<li>
+<p>Add <strong><code>Gpl_type union_gpl_type;</code></strong> to the <code>%union</code> declaration.</p>
+</li>
+<li>
+<p>Declare the type that <code>simple_type</code> holds:</p>
+<pre><code>%type &lt;union_gpl_type&gt; simple_type
+</code></pre>
+<p>This can be appended just after the <code>%token</code> declarations.</p>
+</li>
+</ol>
+</li>
+<li>
+<p>For this project, simplify the rule in the <code>variable_declaration</code> production for declaring arrays. </p>
+<p><span style="color:red">Original:</span> <pre>
+    | simple_type  T_ID T_LBRACKET <strong>expression</strong> T_RBRACKET
+</pre><span style="color:LimeGreen">Simplified:</span> <pre>
+    | simple_type  T_ID T_LBRACKET <strong>T_INT_CONSTANT</strong> T_RBRACKET
+</pre></p>
+</li>
+<li>
+<p>Write the action that accompanies the two <code>variable_declaration</code> rules. Each action should allocate and initialize variables and arrays. Initialize both individual variables and each element of arrays using hard-code values:</p>
+<pre><code>int     42
+double  3.14159
+string  "Hello world"
+</code></pre>
+<p>Error checking should also be done and reported using the error routines found in <code>error.h</code> and <code>error.cpp</code>. For example:</p>
+<pre><code>Table_handler&amp; tabhand=Table_handler::instance();
+if(tabhand.defined_in_current_scope(*$2))
+{
+  Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *$2);
+  // break after error because generated code puts each
+  // rule as a case in a switch statement
+  break; 
+}
+</code></pre>
+</li>
+<li>
+<p>After these actions are completely written, all of the tests should pass.</p>
+</li>
+<li>
+<p>The scanner (<code>gpl.l</code>) dynamically allocates strings for the semantic values of <code>T_ID</code>. To avoid memory leaks these need to be released in the parser. At the end of each action for <code>variable_declaration</code>, release the memory allocated for <code>T_ID</code>:</p>
+<pre><code>delete $2;
+</code></pre>
+<p>Errors that <code>break</code> out of the action (Shown in the #11 example), should release the memory before the break.</p>
+</li>
+<li>
+<p>Syntax errors are sequences of tokens that do not match any rule in the grammar. In this case, the parser itself needs to release memory allocated in the scanner. This is done with the following directive (just add it below the <code>%union</code> directive):</p>
+<pre><code>%destructor { delete $$; } &lt;union_string&gt;
+</code></pre>
+<p>Adding this directive will generate bison warnings in 5-6 places where a rule uses <code>T_ID</code> but for which no action has been written. This is OK in this project.</p>
+</li>
+<li>
+<p>Finally, dynamic memory is allocated for <code>T_CONSTANT_STRING</code>. Since we aren't using this constant in this project, add an action to delete it in the <code>primary_expression</code> production.</p>
+</li>
+<li>
+<p>Use valgrind to confirm that none of the tests leak memory.</p>
+</li>
+</ol>
