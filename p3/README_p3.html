@@ -1,0 +1,203 @@
+
+<!-- saved from url=(0118)https://learn.csuchico.edu/bbcswebdav/pid-3628758-dt-content-rid-62344531_1/courses/192-CSCI515-01-3029/README_p3.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><style>@media print {#ghostery-purple-box {display:none !important}}</style></head><body><h1>The Third Project (p3)</h1>
+<p>Ver. 1 April 2019</p>
+<ul>
+<li>Corrected Multiply::type()</li>
+<li>Added steps 12 and beyond</li>
+</ul>
+<p>Ver. 25 March 2019</p>
+<ul>
+<li>Initial version</li>
+</ul>
+<h2>Summary</h2>
+<p>For this third project, support is added for GPL expressions and variables.</p>
+<h2>Manifest</h2>
+<p>The tarball expands into the following file hierarchy:</p>
+<pre><code>    ./src/p3/README_p3.markdown     Source file used to generate html page
+    ./src/p3/README_p3.html         You are reading this right now.
+
+    ./src/p3/Constant.h             Class declarations: storing integer/double/string constants
+    ./src/p3/Constant.cpp           Class definitions: storing integer/double/string constants
+    ./src/p3/Expression.h           Class declarations and stubs: Managing expressions
+    ./src/p3/Expression.cpp         Class definitions and stubs: Managing expressions
+    ./src/p3/tests/*                Testing suite for P3
+</code></pre>
+<h2>Errata to gpl.y</h2>
+<ol>
+<li>
+<p><span style="color:red">Original:</span> </p><pre>variable_declaration:
+    ...
+    | simple_type T_ID T_LBRACKET <strong>T_INT_CONSTANT</strong> T_RBRACKET
+</pre><span style="color:LimeGreen">Revised:</span> <pre>variable_declaration:
+    ...
+    | simple_type T_ID T_LBRACKET <strong>expression</strong> T_RBRACKET
+</pre><p></p>
+</li>
+<li>
+<p><span style="color:red">Original:</span> </p><pre>expression:
+    ...
+    | <strong>math_operator</strong> T_LPAREN expression T_RPAREN
+</pre><span style="color:LimeGreen">Revised:</span> <pre>expression:
+    ...
+    | <strong>T_SIN</strong> T_LPAREN expression T_RPAREN        {$$=nullptr;/<em>CHANGE</em>/}
+    | <strong>T_COS</strong> T_LPAREN expression T_RPAREN        {$$=nullptr;/<em>CHANGE</em>/}
+    | <strong>T_TAN</strong> T_LPAREN expression T_RPAREN        {$$=nullptr;/<em>CHANGE</em>/}
+    | <strong>T_ASIN</strong> T_LPAREN expression T_RPAREN       {$$=nullptr;/<em>CHANGE</em>/}
+    | <strong>T_ACOS</strong> T_LPAREN expression T_RPAREN       {$$=nullptr;/<em>CHANGE</em>/}
+    | <strong>T_ATAN</strong> T_LPAREN expression T_RPAREN       {$$=nullptr;/<em>CHANGE</em>/}
+    | <strong>T_SQRT</strong> T_LPAREN expression T_RPAREN       {$$=nullptr;/<em>CHANGE</em>/}
+    | <strong>T_ABS</strong> T_LPAREN expression T_RPAREN        {$$=nullptr;/<em>CHANGE</em>/}
+    | <strong>T_FLOOR</strong> T_LPAREN expression T_RPAREN      {$$=nullptr;/<em>CHANGE</em>/}
+    | <strong>T_RANDOM</strong> T_LPAREN expression T_RPAREN     {$$=nullptr;/<em>CHANGE</em>/}
+</pre><p></p>
+</li>
+<li>
+<p><span style="color:red">Original:</span> </p><pre>math_operator:
+    T_SIN
+    | T_COS
+    | T_TAN
+    | T_ASIN
+    | T_ACOS
+    | T_ATAN
+    | T_SQRT
+    | T_ABS
+    | T_FLOOR
+    | T_RANDOM
+    ;
+    </pre><span style="color:LimeGreen">Revised: remove the <code>math_operator</code> production</span><pre></pre><p></p>
+</li>
+</ol>
+<h2>Project description</h2>
+<ol>
+<li>
+<p>Assume a .gpl file with:</p>
+<pre><code>int x=99;
+</code></pre>
+<p>In the previous project, integer initialization was hard-coded to <code>42</code>. Begin this project by coaxing GPL to correctly initialize an integer with its <code>optional_initializer</code> from the <code>variable_declaration</code> production (in this example, 99). A quick look at the scanner (<code>gpl.l</code>) reveals that integers generate the <code>T_INT_CONSTANT</code> for the grammar.  In the parser (<code>gpl.y</code>) this constant is found in the <code>primary_expression</code> production. Wrap the value passed from the scanner into an <code>Integer_constant</code> object:
+</p><pre>primary_expression:
+    ...
+    | T_INT_CONSTANT <strong>{ $$=new Integer_constant($1);}</strong>
+</pre>
+To <code>parser.h</code> add <code>#include&lt;Constant.h&gt;</code><p></p>
+<p>Compiling reveals errors in other rules of the <code>primary_expression</code> production. To silence them assign a <code>nullptr</code> to <code>$$</code> (be sure to add a comment so it is clear the code is temporary).
+</p><pre>primary_expression:
+    T_LPAREN expression T_RPAREN <strong>{$$=nullptr; /*CHANGE*/}</strong>
+    | variable <strong>{$$=nullptr; /*CHANGE*/}</strong>
+    <em>etc.</em>
+</pre>
+  The type for <code>primary_expression</code> token must also be specified:
+<pre><strong>%type &lt;union_expression_ptr&gt; primary_expression</strong>
+</pre>
+As well as adding adding the new type to the union:
+<pre>%union {
+  ...
+  Expression* union_expression_ptr;
+};
+</pre><p></p>
+</li>
+<li>
+<p>Compile. Though we haven't finished the task of integer initialization, the project should successfully compile the current progress.</p>
+</li>
+<li>
+<p>The <code>primary_expression</code> token is a rule in the <code>expression</code> production. Add an action to this rule:
+</p><pre>    expression:
+        primary_expression <strong>{$$=$1;}</strong>
+        ...
+</pre><p></p>
+<p>As was done with <code>primary_expression</code>, add a <code>%type</code> directive for <code>expression</code>.</p>
+<p>Add the <code>{$$=nullptr; /*CHANGE*/}</code> to the remaining rules for the <code>expression</code> production to eliminate compiler errors.</p>
+</li>
+<li>
+<p>Compile and confirm no errors.</p>
+</li>
+<li>
+<p>Write actions for the two rules of the <code>optional_initializer</code> production. The <code>empty</code> rule should just assign <code>$$=nullptr;</code>. Don't forget to add a <code>%type</code> directive.</p>
+</li>
+<li>
+<p>Compile and confirm no errors.</p>
+</li>
+<li>
+<p>for the <code>variable_declaration</code> production, modify the first rule's action. <code>optional_initializer</code> will contain <code>nullptr</code> if it is empty (e.g., <code>int x;</code>) and an <code>Expression*</code> if it can be evaluated (e.g., int x=<code>3+4;</code>). If <code>optional_initializer</code> is empty, assign <code>0</code> (int) ,<code>0.0</code> (double), or <code>""</code> (string) as a default value. Otherwise, <code>evaluate()</code> the <code>Expression*</code>, and then retrieve the value (<code>as_int()</code>, <code>as_double()</code>, or <code>as_string()</code>) according to each <code>case</code> of the <code>switch</code> statement.</p>
+</li>
+<li>
+<p>Ensure the first six tests (<code>tests/t001.gpl</code> - <code>tests/t006.gpl</code>) can be passed.</p>
+</li>
+<li>
+<p>Write the <code>evaluate()</code> and <code>type()</code> member functions for <code>class Plus</code>. The <code>type()</code> function should return the resulting <code>Gpl_type</code> of the expression based on the resulting type of the operator's two operands.</p>
+<pre><code>Gpl_type Plus::type() const
+{
+  Gpl_type lht=lhs-&gt;type();
+  Gpl_type rht=rhs-&gt;type();
+  if(lht==STRING || rht==STRING)
+    return STRING;
+  if(lht==DOUBLE || rht==DOUBLE)
+    return DOUBLE;
+  return INT;
+}
+Constant* Plus::evaluate()
+{
+  Constant* lhs_constant=lhs-&gt;evaluate();
+  Constant* rhs_constant=rhs-&gt;evaluate();
+  try {
+    return evaluated_constant=new Integer_constant(lhs_constant-&gt;as_int() + rhs_constant-&gt;as_int());
+  }catch(...) { try {
+    return evaluated_constant=new Double_constant(lhs_constant-&gt;as_double() + rhs_constant-&gt;as_double());
+  }catch(...) {
+    return evaluated_constant=new String_constant(lhs_constant-&gt;as_string() + rhs_constant-&gt;as_string());
+  }//end of catch for double failure
+  }//end of catch for int failure
+}
+</code></pre>
+</li>
+<li>
+<p>Write the <code>evaluate()</code> and <code>type()</code> member functions for <code>class Multiply</code>. Note that the "last resort" type returned by <code>type()</code> is always INT. This is because if there is a semantic error (for example, trying to divide an integer by a string), the parser recovers by defaulting to a constant integer 0.</p>
+<pre><code>Gpl_type Multiply::type() const
+{
+  Gpl_type lht=lhs-&gt;type();
+  Gpl_type rht=rhs-&gt;type();
+  if(lht==STRING || rht==STRING)
+    return INT;
+  if(lht==DOUBLE || rht==DOUBLE)
+    return DOUBLE;
+  return INT;
+}
+Constant* Multiply::evaluate()
+{
+  Constant* lhs_constant=lhs-&gt;evaluate();
+  Constant* rhs_constant=rhs-&gt;evaluate();
+
+  try {
+    return evaluated_constant=new Integer_constant(lhs_constant-&gt;as_int() * rhs_constant-&gt;as_int());
+  }catch(...) {
+    return evaluated_constant=new Double_constant(lhs_constant-&gt;as_double() * rhs_constant-&gt;as_double());
+  }
+}
+</code></pre>
+</li>
+<li>
+<p>Walk through each of the gpl tests in order. The first 89 tests facilitate developing the binary and unary operators.</p>
+</li>
+<li>
+<p>Add actions for the first two rules of the <code>variable</code> production. This production handles variables found in expressions:
+</p><pre>    5 + <strong>myvar</strong> * 8 / <strong>anothervar[3]</strong>
+</pre><p></p>
+<p>The actions for the first two rules should lookup the symbol from the GPL variable name create a Variable object (see below). <strong>Be sure to write the <code>primary_expression</code> action for <code>variable</code>.</strong> The third and fourth rules of the <code>variable</code> production are not used until a future project.</p>
+</li>
+<li>
+<p>Add a Variable class. <code>Variable::evaluate()</code> should interrogate its associated <code>Symbol</code> and return a <code>*_Constant</code> object that matches the Symbol's type. This will require adding functionality to the <code>Symbol</code> class.</p>
+<pre><code>class Variable : public Expression {
+  public:
+    Variable(std::shared_ptr&lt;Symbol&gt; sym);
+    Variable(std::shared_ptr&lt;Symbol&gt; sym, Expression* index_expr);
+    virtual Constant* evaluate();
+
+    Variable(const Variable&amp;) = delete;
+    Variable&amp; operator=(const Variable&amp;) = delete;
+  private:
+    std::shared_ptr&lt;Symbol&gt; symbol;
+    Expression* array_index_expression;
+};
+</code></pre>
+</li>
+</ol></body></html>

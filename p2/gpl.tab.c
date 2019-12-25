@@ -544,19 +544,19 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   165,   165,   170,   171,   176,   177,   178,   183,   200,
-     240,   241,   242,   247,   248,   253,   254,   259,   260,   261,
-     262,   263,   268,   269,   274,   275,   280,   285,   290,   291,
-     296,   297,   298,   299,   304,   309,   314,   319,   324,   329,
-     334,   335,   336,   337,   338,   339,   340,   341,   342,   343,
-     344,   345,   346,   347,   348,   349,   350,   351,   352,   353,
-     354,   355,   356,   357,   362,   363,   368,   369,   375,   376,
-     381,   382,   383,   384,   385,   390,   391,   396,   401,   406,
-     411,   412,   417,   418,   419,   420,   421,   426,   427,   428,
-     429,   434,   435,   436,   437,   438,   439,   440,   441,   442,
-     443,   444,   445,   446,   447,   448,   449,   450,   451,   452,
-     457,   458,   459,   460,   461,   462,   463,   468,   469,   470,
-     471,   472,   473,   474,   475,   476,   477,   481
+       0,   165,   165,   170,   171,   176,   177,   178,   183,   202,
+     243,   244,   245,   250,   251,   256,   257,   262,   263,   264,
+     265,   266,   271,   272,   277,   278,   283,   288,   293,   294,
+     299,   300,   301,   302,   307,   312,   317,   322,   327,   332,
+     337,   338,   339,   340,   341,   342,   343,   344,   345,   346,
+     347,   348,   349,   350,   351,   352,   353,   354,   355,   356,
+     357,   358,   359,   360,   365,   366,   371,   372,   378,   379,
+     384,   385,   386,   387,   388,   393,   394,   399,   404,   409,
+     414,   415,   420,   421,   422,   423,   424,   429,   430,   431,
+     432,   437,   438,   439,   440,   441,   442,   443,   444,   445,
+     446,   447,   448,   449,   450,   451,   452,   453,   454,   455,
+     460,   461,   462,   463,   464,   465,   466,   471,   472,   473,
+     474,   475,   476,   477,   478,   479,   480,   484
 };
 #endif
 
@@ -1285,7 +1285,24 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
   YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
 
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yytype);
+  switch (yytype)
+    {
+          case 87: /* "identifier"  */
+#line 39 "gpl.y" /* yacc.c:1257  */
+      {delete ((*yyvaluep).union_string);}
+#line 1294 "gpl.tab.c" /* yacc.c:1257  */
+        break;
+
+    case 90: /* "string constant"  */
+#line 39 "gpl.y" /* yacc.c:1257  */
+      {delete ((*yyvaluep).union_string);}
+#line 1300 "gpl.tab.c" /* yacc.c:1257  */
+        break;
+
+
+      default:
+        break;
+    }
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1546,8 +1563,9 @@ yyreduce:
       Table_handler& th = Table_handler::instance();
       if(th.defined_in_current_scope(*(yyvsp[-1].union_string)))
       {
-	Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *(yyvsp[-1].union_string));
-	break;
+	      Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *(yyvsp[-1].union_string));
+	      delete (yyvsp[-1].union_string);
+        break;
       }
       std::shared_ptr<Symbol> sym;
       if((yyvsp[-2].union_gpl_type) == INT)
@@ -1557,12 +1575,13 @@ yyreduce:
       else//($1 == STRING)
 	sym = std::make_shared<Symbol>(*(yyvsp[-1].union_string), new std::string("Hello world"));
       th.insert(sym);	
+      delete (yyvsp[-1].union_string);
     }
-#line 1562 "gpl.tab.c" /* yacc.c:1646  */
+#line 1581 "gpl.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 201 "gpl.y" /* yacc.c:1646  */
+#line 203 "gpl.y" /* yacc.c:1646  */
     {
       Table_handler& th = Table_handler::instance();
       if(th.defined_in_current_scope(*(yyvsp[-3].union_string)))
@@ -1597,30 +1616,37 @@ yyreduce:
 	sym = std::make_shared<Symbol>(*(yyvsp[-3].union_string), test, (yyvsp[-1].union_int));
       }
       th.insert(sym);
+      delete (yyvsp[-3].union_string);
     }
-#line 1602 "gpl.tab.c" /* yacc.c:1646  */
+#line 1622 "gpl.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 240 "gpl.y" /* yacc.c:1646  */
+#line 243 "gpl.y" /* yacc.c:1646  */
     {(yyval.union_gpl_type)=INT;}
-#line 1608 "gpl.tab.c" /* yacc.c:1646  */
+#line 1628 "gpl.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 241 "gpl.y" /* yacc.c:1646  */
+#line 244 "gpl.y" /* yacc.c:1646  */
     {(yyval.union_gpl_type)=DOUBLE;}
-#line 1614 "gpl.tab.c" /* yacc.c:1646  */
+#line 1634 "gpl.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 242 "gpl.y" /* yacc.c:1646  */
+#line 245 "gpl.y" /* yacc.c:1646  */
     {(yyval.union_gpl_type)=STRING;}
-#line 1620 "gpl.tab.c" /* yacc.c:1646  */
+#line 1640 "gpl.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 116:
+#line 466 "gpl.y" /* yacc.c:1646  */
+    {delete (yyvsp[0].union_string);}
+#line 1646 "gpl.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1624 "gpl.tab.c" /* yacc.c:1646  */
+#line 1650 "gpl.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1848,5 +1874,5 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 485 "gpl.y" /* yacc.c:1906  */
+#line 488 "gpl.y" /* yacc.c:1906  */
 

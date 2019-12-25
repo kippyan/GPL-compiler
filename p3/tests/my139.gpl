@@ -1,0 +1,2 @@
+double int_array[3];
+int s_int = int_array[2];

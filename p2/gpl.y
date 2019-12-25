@@ -36,7 +36,7 @@ using namespace std;
  double 	union_double;	
  Gpl_type 	union_gpl_type;
 };
-
+%destructor {delete $$;} <union_string>
 // turn on verbose (longer) error messages
 %error-verbose
 
@@ -185,8 +185,9 @@ variable_declaration:
       Table_handler& th = Table_handler::instance();
       if(th.defined_in_current_scope(*$2))
       {
-	Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *$2);
-	break;
+	      Error::error(Error::PREVIOUSLY_DECLARED_VARIABLE, *$2);
+	      delete $2;
+        break;
       }
       std::shared_ptr<Symbol> sym;
       if($1 == INT)
@@ -196,6 +197,7 @@ variable_declaration:
       else//($1 == STRING)
 	sym = std::make_shared<Symbol>(*$2, new std::string("Hello world"));
       th.insert(sym);	
+      delete $2;
     }
     | simple_type T_ID T_LBRACKET T_INT_CONSTANT T_RBRACKET
     {
@@ -232,6 +234,7 @@ variable_declaration:
 	sym = std::make_shared<Symbol>(*$2, test, $4);
       }
       th.insert(sym);
+      delete $2;
     }
     ;
 
@@ -460,7 +463,7 @@ primary_expression:
     | T_TRUE
     | T_FALSE
     | T_DOUBLE_CONSTANT
-    | T_STRING_CONSTANT
+    | T_STRING_CONSTANT {delete $1;}
     ;
 
 //---------------------------------------------------------------------
