@@ -1,11 +1,6 @@
 
 *.DS_store
 *.o
-p1/results/*
-p2/results/*
-p3/results/*
-p4/results/*
-p5/results/*
-
-
+gpl
+*/results/
 
